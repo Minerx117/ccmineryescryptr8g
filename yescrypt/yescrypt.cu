@@ -57,7 +57,7 @@ void yescryptr24_hash(void *state, const void *input)
 
 void yescryptr32_hash(void *state, const void *input)
 {
-	yescrypt_hash_base(state, input, 4096, 32, 1, (char *)"WaviBanana", 10, 80)
+	yescrypt_hash_base(state, input, 4096, 32, 1, (char *)"WaviBanana", 10, 80);
 }
 
 int scanhash_yescrypt_base(int thr_id, uint32_t *pdata,
