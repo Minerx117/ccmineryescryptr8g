@@ -1,7 +1,7 @@
 # ccminer
 
 Based on Christian Buchner's &amp; Christian H.'s CUDA project
-based on the Fork by tpruvot@github with X14,X15,X17,WHIRL,Blake256 and LYRA2 support , and some others, check the [README.txt](README.txt)
+based on the Fork by tpruvot@github with yescrypt yescryptr8 yescryptr8g yescryptr16 yescrypt32 lyra2z330 & lyra2v3 support , and some others, check the [README.txt](README.txt)
 Reforked and optimized by sp-hash@github and KlausT@github 
 
 * KlausT:

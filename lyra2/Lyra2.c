@@ -43,7 +43,7 @@
  *
  * @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
  */
-int LYRA2(void *K, uint64_t kLen, const void *pwd, uint64_t pwdlen, const void *salt, uint64_t saltlen, uint64_t timeCost, uint64_t nRows, uint64_t nCols, uint32_t bug) {
+int LYRA2(void *K, uint64_t kLen, const void *pwd, uint64_t pwdlen, const void *salt, uint64_t saltlen, uint64_t timeCost, uint64_t nRows, uint64_t nCols, uint32_t bug, uint32_t v3) {
 
     //============================= Basic variables ============================//
     int64_t row = 2; //index of row to be processed
@@ -54,7 +54,8 @@ int LYRA2(void *K, uint64_t kLen, const void *pwd, uint64_t pwdlen, const void *
     int64_t window = 2; //Visitation window (used to define which rows can be revisited during Setup)
     int64_t gap = 1; //Modifier to the step, assuming the values 1 or -1
     int64_t i; //auxiliary iteration counter
-    //==========================================================================/
+	uint64_t instance = 0;
+	//==========================================================================/
 
     //========== Initializing the Memory Matrix and pointers to it =============//
     //Tries to allocate enough space for the whole memory matrix
@@ -170,7 +171,14 @@ int LYRA2(void *K, uint64_t kLen, const void *pwd, uint64_t pwdlen, const void *
   	    //Selects a pseudorandom index row*
   	    //------------------------------------------------------------------------------------------
   	    //rowa = ((unsigned int)state[0]) & (nRows-1);	//(USE THIS IF nRows IS A POWER OF 2)
-  	    rowa = ((uint64_t) (state[0])) % nRows; //(USE THIS FOR THE "GENERIC" CASE)
+			if (v3 != 0) {
+				instance = state[instance & 15];
+
+				rowa = state[instance & 15] % nRows;
+			}
+			else {
+				rowa = ((uint64_t)(state[0])) % nRows; //(USE THIS FOR THE "GENERIC" CASE)
+			}
   	    //------------------------------------------------------------------------------------------
 
   	    //Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]

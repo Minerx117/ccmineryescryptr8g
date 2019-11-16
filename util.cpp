@@ -1577,14 +1577,14 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	}
 
 	hex2bin(sctx->job.version, version, 4);
-	ver = be32dec(sctx->job.version);
-	if (ver == 5) {
-		finalsaplinghash = json_string_value(json_array_get(params, 9));
-		if (!finalsaplinghash || strlen(finalsaplinghash) != 64) {
-		  applog(LOG_ERR, "Stratum notify: invalid parameters");
-			goto out;
-		}
-	}
+	ver = be32dec(sctx->job.version); 
+	if (opt_algo==ALGO_YESCRYPT && ver == 5) { 
+		finalsaplinghash = json_string_value(json_array_get(params, 9)); 
+		if (!finalsaplinghash || strlen(finalsaplinghash) != 64) { 
+		  applog(LOG_ERR, "Stratum notify: invalid parameters"); 
+			goto out; 
+		} 
+	} 
 
 	/* store stratum server time diff */
 	hex2bin((uchar *)&ntime, stime, 4);
@@ -1654,7 +1654,7 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	free(sctx->job.job_id);
 	sctx->job.job_id = strdup(job_id);
 	hex2bin(sctx->job.prevhash, prevhash, 32);
-	if (ver == 5) {
+	if (opt_algo==ALGO_YESCRYPT && ver == 5) { 
 		hex2bin(sctx->job.finalsaplinghash, finalsaplinghash, 32);
 	}
 

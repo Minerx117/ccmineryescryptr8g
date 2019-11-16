@@ -10,9 +10,9 @@ extern "C" {
 }
 
 extern void yescrypt_cpu_init(int thr_id, int threads, uint32_t *d_hash1, uint32_t *d_hash2, uint32_t *d_hash3, uint32_t *d_hash4);
-extern void yescrypt_setTarget(int thr_id, uint32_t pdata[20], char *key, uint32_t key_len, const int perslen);
-extern void yescrypt_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *resultnonces, uint32_t target, const uint32_t N, const uint32_t r, const uint32_t p, const int is112);
-extern void yescrypt_cpu_free(int thr_id);
+extern void yescrypt_setTarget(int thr_id, uint32_t pdata[20], char *key, uint32_t key_len, const int perslen); 
+extern void yescrypt_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *resultnonces, uint32_t target, const uint32_t N, const uint32_t r, const uint32_t p, const int is112); 
+extern void yescrypt_cpu_free(int thr_id); 
 
 extern char *yescrypt_key;
 extern size_t yescrypt_key_len;
@@ -20,7 +20,7 @@ extern uint32_t yescrypt_param_N;
 extern uint32_t yescrypt_param_r;
 extern uint32_t yescrypt_param_p;
 
-void yescrypt_hash_base(void *state, const void *input, const uint32_t N, const uint32_t r, const uint32_t p, char *key, const size_t key_len, int perslen)
+void yescrypt_hash_base(void *state, const void *input, const uint32_t N, const uint32_t r, const uint32_t p, char *key, const size_t key_len, int perslen) 
 {
 	if (client_key_len == 0xff)
 	{
@@ -151,8 +151,8 @@ int scanhash_yescrypt_base(int thr_id, uint32_t *pdata,
 		init = true;
 	}
 
-	uint32_t endiandata[32];
-	for (int k = 0; k < 32; k++)
+	uint32_t endiandata[32]; 
+	for (int k = 0; k < 32; k++) 
 		be32enc(&endiandata[k], pdata[k]);
 
 	yescrypt_setTarget(thr_id, pdata, key, key_len, perslen);
@@ -190,11 +190,11 @@ int scanhash_yescrypt_base(int thr_id, uint32_t *pdata,
 					}
 					if (vhash64[7] <= Htarg && fulltest(vhash64, ptarget))
 					{
-						if (perslen == 80)
-							pdata[21] = foundNonce[1];
-						else
-							pdata[29] = foundNonce[1];
-						res++;
+						if (perslen == 80) 
+							pdata[21] = foundNonce[1]; 
+						else 
+							pdata[29] = foundNonce[1]; 
+						res++; 
 						if (opt_benchmark)  applog(LOG_INFO, "GPU #%d Found second nonce %08x", thr_id, foundNonce[1]);
 					}
 					else
@@ -229,21 +229,21 @@ int scanhash_yescrypt(int thr_id, uint32_t *pdata,
 	if (yescrypt_param_N == 0) yescrypt_param_N = 2048;
 	if (yescrypt_param_r == 0) yescrypt_param_r = 8;
 	if (yescrypt_param_p == 0) yescrypt_param_p = 1;
-	return  scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, yescrypt_param_N, yescrypt_param_r, yescrypt_param_p, yescrypt_key, yescrypt_key_len, perslen);
-}
+	return scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, yescrypt_param_N, yescrypt_param_r, yescrypt_param_p, yescrypt_key, yescrypt_key_len, perslen); 
+} 
 
 int scanhash_yescryptr8(int thr_id, uint32_t *pdata,
 	uint32_t *ptarget, uint32_t max_nonce,
 	uint32_t *hashes_done)
 {
-	return  scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, 2048, 8, 1, (char *)"Client Key", 10, 80);
+	return scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, 2048, 8, 1, (char *)"Client Key", 10, 80);
 }
 
 int scanhash_yescryptr16(int thr_id, uint32_t *pdata,
 	uint32_t *ptarget, uint32_t max_nonce,
 	uint32_t *hashes_done)
 {
-	return  scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, 4096, 16, 1, (char *)"Client Key", 10, 80);
+	return scanhash_yescrypt_base(thr_id, pdata, ptarget, max_nonce, hashes_done, 4096, 16, 1, (char *)"Client Key", 10, 80);
 }
 
 int scanhash_yescryptr16v2(int thr_id, uint32_t *pdata,

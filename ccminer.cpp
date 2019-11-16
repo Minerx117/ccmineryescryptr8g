@@ -56,7 +56,7 @@ BOOL WINAPI ConsoleHandler(DWORD);
 #endif
 
 #define PROGRAM_NAME		"ccminer"
-#define LP_SCANTIME		25
+#define LP_SCANTIME		10
 #define MNR_BLKHDR_SZ 80
 
 double expectedblocktime(const uint32_t *target);
@@ -113,6 +113,7 @@ const char *algo_names[] =
 	"jackpot",
 	"luffa",
 	"lyra2v2",
+	"lyra2v3",
 	"myr-gr",
 	"nist5",
 	"penta",
@@ -862,7 +863,8 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			return false;
 		}
 
-			int ret;
+		res = json_object_get(val, "result");
+		int ret;
 		if (json_is_object(res))
 		{
 			char *res_str;
@@ -883,8 +885,6 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			ret = share_result(json_is_null(res), json_string_value(res));
 		}
 		if (!ret)
-
-		if (!share_result(json_is_true(res), reason ? json_string_value(reason) : NULL))
 		{
 			if (check_dups)
 				hashlog_purge_job(work->job_id);
@@ -896,7 +896,6 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 #endif
 	else
 	{
-
 		/* build hex string */
 		char *str = NULL;
 		for(int i = 0; i < (work->datasize >> 2); i++)
@@ -921,7 +920,8 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			return false;
 		}
 
-			int ret;
+		res = json_object_get(val, "result");
+		int ret;
 		if (json_is_object(res))
 		{
 			char *res_str;
@@ -942,8 +942,6 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			ret = share_result(json_is_null(res), json_string_value(res));
 		}
 		if (!ret)
-
-		if(!share_result(json_is_true(res), reason ? json_string_value(reason) : NULL))
 		{
 			if(check_dups)
 				hashlog_purge_job(work->job_id);
@@ -1097,7 +1095,7 @@ static bool gbt_work_decode_full(const json_t *val, struct work *work)
 		goto out;
 	}
 	version = (uint32_t)json_integer_value(tmp);
-	if ((version & 0xffU) == 5) {
+	if (opt_algo == ALGO_YESCRYPT && (version & 0xffU) == 5) {
 		sapling = true;
 	} else if ((version & 0xffU) > BLOCK_VERSION_CURRENT) {
 		if (version_reduce) {
@@ -1131,7 +1129,7 @@ static bool gbt_work_decode_full(const json_t *val, struct work *work)
 		goto out;
 	}
 
-		if (sapling) {
+	if (sapling) {
 		if (unlikely(!jobj_binary(val, "finalsaplingroothash", final_sapling_hash, sizeof(final_sapling_hash)))) {
 			applog(LOG_ERR, "JSON invalid finalsaplingroothash");
 			goto out;
@@ -1288,7 +1286,7 @@ static bool gbt_work_decode_full(const json_t *val, struct work *work)
 		work->data[9 + i] = be32dec((uint32_t *)merkle_tree[0] + i);
 	work->data[17] = swab32(curtime);
 	work->data[18] = le32dec(&bits);
-		if (sapling) {
+	if (sapling) {
 		work->sapling = true;
 		work->data[19] = 0x00000000;
 		for (i = 0; i < 8; i++)
@@ -1854,7 +1852,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			work->data[9 + i] = be32dec((uint32_t *)merkle_root + i);
 		work->data[17] = le32dec(sctx->job.ntime);
 		work->data[18] = le32dec(sctx->job.nbits);
-			if (be32dec(sctx->job.version) >= 5) {
+		if (opt_algo == ALGO_YESCRYPT && be32dec(sctx->job.version) >= 5) {
 			work->sapling = true;
 			for (i = 0; i < 8; i++)
 				work->data[20 + i] = le32dec((uint32_t *)sctx->job.finalsaplinghash + i);
@@ -1915,6 +1913,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_GROESTL:
 		case ALGO_KECCAK:
 		case ALGO_LYRA2v2:
+		case ALGO_LYRA2v3:
 		case ALGO_LYRA2RE:
 		case ALGO_LYRA2Z:
 		case ALGO_LYRA2Z330:
@@ -2174,6 +2173,7 @@ static void *miner_thread(void *userdata)
 				minmax = 1000000 * max64time;
 				break;
 			case ALGO_LYRA2v2:
+			case ALGO_LYRA2v3:
 			case ALGO_LYRA2RE:
 			case ALGO_LYRA2Z:
 				minmax = 1900000 * max64time;
@@ -2221,7 +2221,9 @@ static void *miner_thread(void *userdata)
 		hashes_done = 0;
 		gettimeofday(&tv_start, NULL);
 		uint32_t databackup;
-		if(opt_algo != ALGO_SIA)
+		if(work.sapling)
+			databackup = nonceptr[10];
+		else if(opt_algo != ALGO_SIA)
 			databackup = nonceptr[2];
 		else
 			databackup = nonceptr[12];
@@ -2320,6 +2322,10 @@ static void *miner_thread(void *userdata)
 			rc = scanhash_lyra2v2(thr_id, work.data, work.target,
 				max_nonce, &hashes_done);
 			break;
+		case ALGO_LYRA2v3:
+			rc = scanhash_lyra2v3(thr_id, work.data, work.target,
+				max_nonce, &hashes_done);
+			break;
 
 		case ALGO_NIST5:
 			rc = scanhash_nist5(thr_id, work.data, work.target,
@@ -2378,9 +2384,9 @@ static void *miner_thread(void *userdata)
 
 #ifndef ORG
 		case ALGO_YESCRYPT:
-		perslen =  work.sapling ? 112 : 80;
+			perslen =  work.sapling ? 112 : 80;
 			rc = scanhash_yescrypt(thr_id, work.data, work.target,
-							 max_nonce, &hashes_done, perslen);
+							  max_nonce, &hashes_done, perslen);
 			break;
 
 		case ALGO_YESCRYPTR8:
@@ -2446,8 +2452,12 @@ static void *miner_thread(void *userdata)
 			applog(LOG_NOTICE, CL_CYN "found => %08x" CL_GRN " %08x", nonceptr[0], swab32(nonceptr[0])); // data[19]
 		if(opt_algo != ALGO_SIA)
 		{
-			if(rc > 1 && opt_debug)
-				applog(LOG_NOTICE, CL_CYN "found => %08x" CL_GRN " %08x", nonceptr[2], swab32(nonceptr[2])); // data[21]
+			if(rc > 1 && opt_debug) {
+				if(work.sapling)
+					applog(LOG_NOTICE, CL_CYN "found => %08x" CL_GRN " %08x", nonceptr[10], swab32(nonceptr[10])); // data[21]
+				else
+					applog(LOG_NOTICE, CL_CYN "found => %08x" CL_GRN " %08x", nonceptr[2], swab32(nonceptr[2])); // data[21]
+			}
 		}
 		else
 		{
@@ -2526,7 +2536,12 @@ static void *miner_thread(void *userdata)
 		if(rc && !opt_benchmark)
 		{
 			uint32_t found2;
-			if(opt_algo != ALGO_SIA)
+			if(work.sapling)
+			{
+				found2 = nonceptr[10];
+				nonceptr[10] = databackup;
+			}
+			else if(opt_algo != ALGO_SIA)
 			{
 				found2 = nonceptr[2];
 				nonceptr[2] = databackup;

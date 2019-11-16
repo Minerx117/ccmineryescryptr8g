@@ -18,7 +18,7 @@ void lyra2z330_hash(void *state, const void *input, const uint64_t timeCost, con
 {
 	uint32_t hashA[8];
 
-	LYRA2(hashA, 32, input, 80, input, 80, timeCost, row, col, bug);
+	LYRA2(hashA, 32, input, 80, input, 80, timeCost, row, col, bug,0);
 
 	memcpy(state, hashA, 32);
 }

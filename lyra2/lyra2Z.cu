@@ -27,7 +27,7 @@ void lyra2z_hash(void *state, const void *input)
 	sph_blake256(&ctx_blake, input, 80);
 	sph_blake256_close(&ctx_blake, hashA);
 
-	LYRA2(hashB, 32, hashA, 32, hashA, 32, 8, 8, 8, LYRA2_NOBUG);
+	LYRA2(hashB, 32, hashA, 32, hashA, 32, 8, 8, 8, LYRA2_NOBUG,0);
 
 	memcpy(state, hashB, 32);
 }

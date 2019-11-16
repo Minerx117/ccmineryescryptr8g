@@ -502,101 +502,102 @@ __global__ void yescrypt_gpu_hash_k0(int threads, uint32_t startNonce, const uin
 	}
 }
 
-__launch_bounds__(32, 1)
-__global__ void yescrypt_gpu_hash_k0_112bytes(int threads, uint32_t startNonce, const uint32_t r, const uint32_t p)
-{
-	int thread = (blockDim.x * blockIdx.x + threadIdx.x);
+__launch_bounds__(32, 1) 
+__global__ void yescrypt_gpu_hash_k0_112bytes(int threads, uint32_t startNonce, const uint32_t r, const uint32_t p) 
+{ 
+	int thread = (blockDim.x * blockIdx.x + threadIdx.x); 
 
-	//if (thread < threads)
-	{
-		uint32_t nonce = startNonce + thread;
-		uint32_t in[16];
-		uint32_t result[16];
-		uint32_t state1[8], state2[8];
-		uint32_t passwd[8];
+	//if (thread < threads) 
+	{ 
+		uint32_t nonce = startNonce + thread; 
+		uint32_t in[16]; 
+		uint32_t result[16]; 
+		uint32_t state1[8], state2[8]; 
+		uint32_t passwd[8]; 
 
-		in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce;
-		in[4] = c_data[20]; in[5] = c_data[21]; in[6] = c_data[22]; in[7] = c_data[23];
-		in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27];
-		in[12] = 0x80000000; in[13] = in[14] = 0x00000000; in[15] = 0x00000380;
-		passwd[0] = cpu_h[0]; passwd[1] = cpu_h[1]; passwd[2] = cpu_h[2]; passwd[3] = cpu_h[3];
-		passwd[4] = cpu_h[4]; passwd[5] = cpu_h[5]; passwd[6] = cpu_h[6]; passwd[7] = cpu_h[7];
-		sha256_round_body(in, passwd);	// length = 112 * 8 = 896 = 0x380
+		in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce; 
+		in[4] = c_data[20]; in[5] = c_data[21]; in[6] = c_data[22]; in[7] = c_data[23]; 
+		in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27]; 
+		in[12] = 0x80000000; in[13] = in[14] = 0x00000000; in[15] = 0x00000380; 
+		passwd[0] = cpu_h[0]; passwd[1] = cpu_h[1]; passwd[2] = cpu_h[2]; passwd[3] = cpu_h[3]; 
+		passwd[4] = cpu_h[4]; passwd[5] = cpu_h[5]; passwd[6] = cpu_h[6]; passwd[7] = cpu_h[7]; 
+		sha256_round_body(in, passwd);	// length = 112 * 8 = 896 = 0x380 
 
-		in[0] = passwd[0] ^ 0x36363636; in[1] = passwd[1] ^ 0x36363636; in[2] = passwd[2] ^ 0x36363636; in[3] = passwd[3] ^ 0x36363636;
-		in[4] = passwd[4] ^ 0x36363636; in[5] = passwd[5] ^ 0x36363636; in[6] = passwd[6] ^ 0x36363636; in[7] = passwd[7] ^ 0x36363636;
-		in[8] = in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = in[15] = 0x36363636;
-		state1[0] = 0x6A09E667; state1[1] = 0xBB67AE85; state1[2] = 0x3C6EF372; state1[3] = 0xA54FF53A;
-		state1[4] = 0x510E527F; state1[5] = 0x9B05688C; state1[6] = 0x1F83D9AB; state1[7] = 0x5BE0CD19;
-		sha256_round_body(in, state1);	// inner 64byte
+		in[0] = passwd[0] ^ 0x36363636; in[1] = passwd[1] ^ 0x36363636; in[2] = passwd[2] ^ 0x36363636; in[3] = passwd[3] ^ 0x36363636; 
+		in[4] = passwd[4] ^ 0x36363636; in[5] = passwd[5] ^ 0x36363636; in[6] = passwd[6] ^ 0x36363636; in[7] = passwd[7] ^ 0x36363636; 
+		in[8] = in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = in[15] = 0x36363636; 
+		state1[0] = 0x6A09E667; state1[1] = 0xBB67AE85; state1[2] = 0x3C6EF372; state1[3] = 0xA54FF53A; 
+		state1[4] = 0x510E527F; state1[5] = 0x9B05688C; state1[6] = 0x1F83D9AB; state1[7] = 0x5BE0CD19; 
+		sha256_round_body(in, state1);	// inner 64byte 
 
-		in[0] = passwd[0] ^ 0x5c5c5c5c; in[1] = passwd[1] ^ 0x5c5c5c5c; in[2] = passwd[2] ^ 0x5c5c5c5c; in[3] = passwd[3] ^ 0x5c5c5c5c;
-		in[4] = passwd[4] ^ 0x5c5c5c5c; in[5] = passwd[5] ^ 0x5c5c5c5c; in[6] = passwd[6] ^ 0x5c5c5c5c; in[7] = passwd[7] ^ 0x5c5c5c5c;
-		in[8] = in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = in[15] = 0x5c5c5c5c;
-		state2[0] = 0x6A09E667; state2[1] = 0xBB67AE85; state2[2] = 0x3C6EF372; state2[3] = 0xA54FF53A;
-		state2[4] = 0x510E527F; state2[5] = 0x9B05688C; state2[6] = 0x1F83D9AB; state2[7] = 0x5BE0CD19;
-		sha256_round_body(in, state2);	// outer 64byte
+		in[0] = passwd[0] ^ 0x5c5c5c5c; in[1] = passwd[1] ^ 0x5c5c5c5c; in[2] = passwd[2] ^ 0x5c5c5c5c; in[3] = passwd[3] ^ 0x5c5c5c5c; 
+		in[4] = passwd[4] ^ 0x5c5c5c5c; in[5] = passwd[5] ^ 0x5c5c5c5c; in[6] = passwd[6] ^ 0x5c5c5c5c; in[7] = passwd[7] ^ 0x5c5c5c5c; 
+		in[8] = in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = in[15] = 0x5c5c5c5c; 
+		state2[0] = 0x6A09E667; state2[1] = 0xBB67AE85; state2[2] = 0x3C6EF372; state2[3] = 0xA54FF53A; 
+		state2[4] = 0x510E527F; state2[5] = 0x9B05688C; state2[6] = 0x1F83D9AB; state2[7] = 0x5BE0CD19; 
+		sha256_round_body(in, state2);	// outer 64byte 
 
-		in[0] = c_data[0]; in[1] = c_data[1]; in[2] = c_data[2]; in[3] = c_data[3];
-		in[4] = c_data[4]; in[5] = c_data[5]; in[6] = c_data[6]; in[7] = c_data[7];
-		in[8] = c_data[8]; in[9] = c_data[9]; in[10] = c_data[10]; in[11] = c_data[11];
-		in[12] = c_data[12]; in[13] = c_data[13]; in[14] = c_data[14]; in[15] = c_data[15];
-		sha256_round_body(in, state1);	// inner 128byte
+		in[0] = c_data[0]; in[1] = c_data[1]; in[2] = c_data[2]; in[3] = c_data[3]; 
+		in[4] = c_data[4]; in[5] = c_data[5]; in[6] = c_data[6]; in[7] = c_data[7]; 
+		in[8] = c_data[8]; in[9] = c_data[9]; in[10] = c_data[10]; in[11] = c_data[11]; 
+		in[12] = c_data[12]; in[13] = c_data[13]; in[14] = c_data[14]; in[15] = c_data[15]; 
+		sha256_round_body(in, state1);	// inner 128byte 
 
-#pragma unroll
-		for (uint32_t i = 0; i < 2 * r*p; i++)
-		{
-			in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce;
+#pragma unroll 
+		for (uint32_t i = 0; i < 2 * r*p; i++) 
+		{ 
+			in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce; 
+			in[4] = c_data[20]; in[5] = c_data[21]; in[6] = c_data[22]; in[7] = c_data[23]; 
+			in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27]; 
+			in[12] = i * 2 + 1; in[13] = 0x80000000; in[14] = 0x00000000; in[15] = 0x000005A0; 
+			result[0] = state1[0]; result[1] = state1[1]; result[2] = state1[2]; result[3] = state1[3]; 
+			result[4] = state1[4]; result[5] = state1[5]; result[6] = state1[6]; result[7] = state1[7]; 
+			sha256_round_body(in, result + 0);	// inner length = 180 * 8 = 1184 = 0x5A0 
+
+			in[0] = result[0]; in[1] = result[1]; in[2] = result[2]; in[3] = result[3]; 
+			in[4] = result[4]; in[5] = result[5]; in[6] = result[6]; in[7] = result[7]; 
+			in[8] = 0x80000000; in[15] = 0x00000300; 
+			in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = 0x00000000; 
+			result[0] = state2[0]; result[1] = state2[1]; result[2] = state2[2]; result[3] = state2[3]; 
+			result[4] = state2[4]; result[5] = state2[5]; result[6] = state2[6]; result[7] = state2[7]; 
+			sha256_round_body(in, result + 0);	// outer length = 96 * 8 = 768 = 0x300 
+
+			in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce; 
 			in[4] = c_data[20]; in[5] = c_data[21]; in[6] = c_data[22]; in[7] = c_data[23];
-			in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27];
-			in[12] = i * 2 + 1; in[13] = 0x80000000; in[14] = 0x00000000; in[15] = 0x000005A0;
-			result[0] = state1[0]; result[1] = state1[1]; result[2] = state1[2]; result[3] = state1[3];
-			result[4] = state1[4]; result[5] = state1[5]; result[6] = state1[6]; result[7] = state1[7];
-			sha256_round_body(in, result + 0);	// inner length = 180 * 8 = 1184 = 0x5A0
+ 			in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27]; 
+			in[12] = i * 2 + 2; in[13] = 0x80000000; in[14] = 0x00000000; in[15] = 0x000005A0; 
+			result[8] = state1[0]; result[9] = state1[1]; result[10] = state1[2]; result[11] = state1[3]; 
+			result[12] = state1[4]; result[13] = state1[5]; result[14] = state1[6]; result[15] = state1[7]; 
+			sha256_round_body(in, result + 8);	// inner length = 180 * 8 = 1184 = 0x5A0 
 
-			in[0] = result[0]; in[1] = result[1]; in[2] = result[2]; in[3] = result[3];
-			in[4] = result[4]; in[5] = result[5]; in[6] = result[6]; in[7] = result[7];
-			in[8] = 0x80000000; in[15] = 0x00000300;
-			in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = 0x00000000;
-			result[0] = state2[0]; result[1] = state2[1]; result[2] = state2[2]; result[3] = state2[3];
-			result[4] = state2[4]; result[5] = state2[5]; result[6] = state2[6]; result[7] = state2[7];
-			sha256_round_body(in, result + 0);	// outer length = 96 * 8 = 768 = 0x300
-			in[0] = c_data[16]; in[1] = c_data[17]; in[2] = c_data[18]; in[3] = nonce;
-			in[4] = c_data[20]; in[5] = c_data[21]; in[6] = c_data[22]; in[7] = c_data[23];
-			in[8] = c_data[24]; in[9] = c_data[25]; in[10] = c_data[26]; in[11] = c_data[27];
-			in[12] = i * 2 + 2; in[13] = 0x80000000; in[14] = 0x00000000; in[15] = 0x000005A0;
-			result[8] = state1[0]; result[9] = state1[1]; result[10] = state1[2]; result[11] = state1[3];
-			result[12] = state1[4]; result[13] = state1[5]; result[14] = state1[6]; result[15] = state1[7];
-			sha256_round_body(in, result + 8);	// inner length = 180 * 8 = 1184 = 0x5A0
+			in[0] = result[8]; in[1] = result[9]; in[2] = result[10]; in[3] = result[11]; 
+			in[4] = result[12]; in[5] = result[13]; in[6] = result[14]; in[7] = result[15]; 
+			in[8] = 0x80000000; in[15] = 0x00000300; 
+			in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = 0x00000000; 
+			result[8] = state2[0]; result[9] = state2[1]; result[10] = state2[2]; result[11] = state2[3]; 
+			result[12] = state2[4]; result[13] = state2[5]; result[14] = state2[6]; result[15] = state2[7]; 
+			sha256_round_body(in, result + 8);	// outer length = 96 * 8 = 768 = 0x300 
 
-			in[0] = result[8]; in[1] = result[9]; in[2] = result[10]; in[3] = result[11];
-			in[4] = result[12]; in[5] = result[13]; in[6] = result[14]; in[7] = result[15];
-			in[8] = 0x80000000; in[15] = 0x00000300;
-			in[9] = in[10] = in[11] = in[12] = in[13] = in[14] = 0x00000000;
-			result[8] = state2[0]; result[9] = state2[1]; result[10] = state2[2]; result[11] = state2[3];
-			result[12] = state2[4]; result[13] = state2[5]; result[14] = state2[6]; result[15] = state2[7];
-			sha256_round_body(in, result + 8);	// outer length = 96 * 8 = 768 = 0x300
+			*(uint4*)&Bdev(i, 0) = make_uint4(cuda_swab32(result[0]), cuda_swab32(result[5]), cuda_swab32(result[10]), cuda_swab32(result[15])); 
+			*(uint4*)&Bdev(i, 4) = make_uint4(cuda_swab32(result[4]), cuda_swab32(result[9]), cuda_swab32(result[14]), cuda_swab32(result[3])); 
+			*(uint4*)&Bdev(i, 8) = make_uint4(cuda_swab32(result[8]), cuda_swab32(result[13]), cuda_swab32(result[2]), cuda_swab32(result[7])); 
+			*(uint4*)&Bdev(i, 12) = make_uint4(cuda_swab32(result[12]), cuda_swab32(result[1]), cuda_swab32(result[6]), cuda_swab32(result[11])); 
 
-			*(uint4*)&Bdev(i, 0) = make_uint4(cuda_swab32(result[0]), cuda_swab32(result[5]), cuda_swab32(result[10]), cuda_swab32(result[15]));
-			*(uint4*)&Bdev(i, 4) = make_uint4(cuda_swab32(result[4]), cuda_swab32(result[9]), cuda_swab32(result[14]), cuda_swab32(result[3]));
-			*(uint4*)&Bdev(i, 8) = make_uint4(cuda_swab32(result[8]), cuda_swab32(result[13]), cuda_swab32(result[2]), cuda_swab32(result[7]));
-			*(uint4*)&Bdev(i, 12) = make_uint4(cuda_swab32(result[12]), cuda_swab32(result[1]), cuda_swab32(result[6]), cuda_swab32(result[11]));
+			if (i == 0) { 
+				sha256dev(0) = result[0]; 
+				sha256dev(1) = result[1]; 
+				sha256dev(2) = result[2]; 
+				sha256dev(3) = result[3]; 
+				sha256dev(4) = result[4]; 
+				sha256dev(5) = result[5]; 
+				sha256dev(6) = result[6]; 
+				sha256dev(7) = result[7]; 
+			} 
+		} 
+	} 
+} 
 
-			if (i == 0) {
-				sha256dev(0) = result[0];
-				sha256dev(1) = result[1];
-				sha256dev(2) = result[2];
-				sha256dev(3) = result[3];
-				sha256dev(4) = result[4];
-				sha256dev(5) = result[5];
-				sha256dev(6) = result[6];
-				sha256dev(7) = result[7];
-			}
-		}
-	}
-}
-
-__launch_bounds__(32, 1)
+__launch_bounds__(32, 1) 
 __global__ void yescrypt_gpu_hash_k5(int threads, uint32_t startNonce, uint32_t *nonceVector, uint32_t target, const uint32_t r, const uint32_t p)
 {
 	int thread = (blockDim.x * blockIdx.x + threadIdx.x);
@@ -1247,7 +1248,7 @@ void yescrypt_cpu_init(int thr_id, int threads, uint32_t *d_hash1, uint32_t *d_h
 }
 
 __host__
-void yescrypt_setTarget(int thr_id, uint32_t pdata[28], char *key, uint32_t key_len, const int perslen)
+void yescrypt_setTarget(int thr_id, uint32_t pdata[20], char *key, uint32_t key_len, const int perslen)
 {
 	uint32_t h[8], data[32];
 
@@ -1279,24 +1280,24 @@ void yescrypt_setTarget(int thr_id, uint32_t pdata[28], char *key, uint32_t key_
 	}
 	else
 	{
-		if (perslen == 80) {
-			memcpy(data, pdata, 80);
-			data[20] = 0x80000000;
-			data[21] = data[22] = data[23] = data[24] = data[25] = data[26] = data[27] = data[28] = data[29] = data[30] = 0;
-			data[31] = (80 + 64) * 8;
-		} else {
-			memcpy(data, pdata, 112);
-			data[28] = 0x80000000;
-			data[29] = data[30] = 0;
-			data[31] = (112 + 64) * 8;
-		}
+		if (perslen == 80) { 
+			memcpy(data, pdata, 80); 
+			data[20] = 0x80000000; 
+			data[21] = data[22] = data[23] = data[24] = data[25] = data[26] = data[27] = data[28] = data[29] = data[30] = 0; 
+			data[31] = (80 + 64) * 8; 
+		} else { 
+			memcpy(data, pdata, 112); 
+			data[28] = 0x80000000; 
+			data[29] = data[30] = 0; 
+			data[31] = (112 + 64) * 8; 
+		} 
 		key_len = 0;
 	}
 	CUDA_SAFE_CALL(cudaMemcpyToSymbol(client_key, data, 32 * sizeof(uint32_t), 0, cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpyToSymbol(client_key_len, &key_len, sizeof(uint32_t), 0, cudaMemcpyHostToDevice));
 }
 
-__host__ void yescrypt_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *resultnonces, uint32_t target, const uint32_t N, const uint32_t r, const uint32_t p, const int is112)
+__host__ void yescrypt_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint32_t *resultnonces, uint32_t target, const uint32_t N, const uint32_t r, const uint32_t p, const int is112) 
 {
 	int dev_id = device_map[thr_id % MAX_GPUS];
 	CUDA_SAFE_CALL(cudaMemset(d_GNonce[thr_id], 0, 2 * sizeof(uint32_t)));
@@ -1330,23 +1331,23 @@ __host__ void yescrypt_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startN
 	const uint32_t Nw = ((N + 2) / 3) & ~1;
 	const uint32_t Nr = ((N + 2) / 3 + 1) & ~1;
 
-	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½Errorï¿½É‚È‚ï¿½Ì‚ÅAloop_countï¿½Å“Kï¿½xï¿½É•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
+	// ‰ž“š‚ª’x‚¢‚ÆError‚É‚È‚é‚Ì‚ÅAloop_count‚Å“K“x‚É•ªŠ„‚µ‚Ü‚·B
 	uint32_t loop_count;
 	if (device_sm[dev_id] > 500) loop_count = max(N * r / 16384, 1);
 	else if (device_sm[dev_id] == 500) loop_count = max(N * r / 8192, 1);
 	else if (device_sm[dev_id] > 300) loop_count = max(N * r / 4096, 1);
 	else loop_count = max(N * r / 2048, 1);
 
-	if (is112)
-		yescrypt_gpu_hash_k0_112bytes << <grid, block >> > (threads, startNounce, r, p);
-	else
-		yescrypt_gpu_hash_k0 << <grid, block >> > (threads, startNounce, r, p);
+	if (is112) 
+		yescrypt_gpu_hash_k0_112bytes << <grid, block >> > (threads, startNounce, r, p); 
+	else 
+		yescrypt_gpu_hash_k0 << <grid, block >> > (threads, startNounce, r, p); 
 	CUDA_SAFE_CALL(cudaGetLastError());
 	for (uint32_t l = 0; l < p; l++)
 	{
-		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÌŽgï¿½pï¿½Ê‚ï¿½}ï¿½ï¿½ï¿½é‚½ï¿½ßA16ï¿½ï¿½ï¿½ï¿½ï¿½Å‰ï¿½ï¿½Zï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
-		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ayescrypt_gpu_hash_k1ï¿½ï¿½16ï¿½ï¿½ï¿½ï¿½ï¿½Í•sï¿½ï¿½ï¿½ï¿½ï¿½ÅAï¿½ï¿½ï¿½Ì•ï¿½ï¿½ï¿½ï¿½Ìƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½pï¿½Ê‚ï¿½ï¿½ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½ßA
-		// yescrypt_gpu_hash_k1ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½ï¿½Å‰ï¿½ï¿½Zï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
+		// ƒƒ‚ƒŠ‚ÌŽg—p—Ê‚ð—}‚¦‚é‚½‚ßA16•ªŠ„‚Å‰‰ŽZ‚ðs‚¢‚Ü‚·B
+		// ‚µ‚©‚µAyescrypt_gpu_hash_k1‚Å16•ªŠ„‚Í•sŒü‚«‚ÅA‚±‚Ì•”•ª‚Ìƒƒ‚ƒŠŽg—p—Ê‚à­‚È‚¢‚½‚ßA
+		// yescrypt_gpu_hash_k1‚Í4•ªŠ„‚Å‰‰ŽZ‚ðs‚¢‚Ü‚·B
 		for (uint32_t i = 0; i < 4; i++)
 		{
 			yescrypt_gpu_hash_k1 << <grid, block2, sm >> > (threads, startNounce, i * (threads >> 2) + l * r * 2 * threads);

@@ -286,7 +286,9 @@
       <FileType>CppCode</FileType>
     </CudaCompile>
     <CudaCompile Include="lyra2\cuda_lyra2.cu" />
+    <CudaCompile Include="lyra2\cuda_lyra2v3.cu" />
     <CudaCompile Include="lyra2\lyra2RE.cu" />
+    <CudaCompile Include="lyra2\lyra2REv3.cu" />
     <CudaCompile Include="lyra2\lyra2Z.cu" />
     <CudaCompile Include="lyra2\lyra2Z330.cu" />
     <CudaCompile Include="Sia\sia.cu" />

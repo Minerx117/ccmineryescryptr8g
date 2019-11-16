@@ -30,6 +30,7 @@ ccminer_SOURCES = elist.h miner.h compat.h \
 			  myriadgroestl.cpp cuda_myriadgroestl.cu \
 			  lyra2/Lyra2.c lyra2/Sponge.c \
 			  lyra2/lyra2REv2.cu lyra2/cuda_lyra2v2.cu \
+			  lyra2/lyra2REv3.cu lyra2/cuda_lyra2v3.cu \
 			  lyra2/lyra2RE.cu lyra2/lyra2Z.cu \
 			  lyra2/lyra2Z330.cu lyra2/cuda_lyra2.cu \
 			  Algo256/cuda_blake256.cu Algo256/cuda_groestl256.cu Algo256/cuda_keccak256.cu Algo256/cuda_skein256.cu \
@@ -61,7 +62,7 @@ ccminer_SOURCES = elist.h miner.h compat.h \
 			  x15/cuda_whirlpoolx.cu x15/whirlpoolx.cu \
 			  yescrypt/yescrypt.cu yescrypt/cuda_yescrypt.cu \
 			  sph/yescrypt.h sph/yescrypt-platform.h sph/yescrypt-opt.c sph/yescrypt-common.c \
-			  neoscrypt/neoscrypt.cu neoscrypt/cuda_neoscrypt.cu \
+			  neoscrypt/neoscrypt.cu neoscrypt/cuda_neoscrypt.cu
 
 # scrypt
 # ccminer_SOURCES += scrypt.cpp scrypt-jane.cpp \
