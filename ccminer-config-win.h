@@ -165,7 +165,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.21r18-yescryptr-v4"
+#define PACKAGE_VERSION "8.21r18-yescryptr-v5"
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -188,7 +188,7 @@
 //#define USE_XOP 1
 
 /* Version number of package */
-#define VERSION "8.21-yescryptr-v4"
+#define VERSION "8.21-yescryptr-v5"
 
 /* Define curl_free() as free() if our version of curl lacks curl_free. */
 /* #undef curl_free */
